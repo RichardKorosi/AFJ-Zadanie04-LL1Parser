@@ -3,8 +3,10 @@ import re
 
 class Grammar:
     def __init__(self, grammar):
-        # Reduce grammar
         self.grammar = grammar
+        self.firsts = {}
+
+        # Reduce grammar
         self.grammar, self.start_non_terminal = self.parse_grammar()
 
         self.nt = self.fill_nt()
@@ -13,12 +15,12 @@ class Grammar:
         self.vd = self.fill_vd()
         self.grammar = self.remove_non_vd_from_grammar()
 
-        # First
-        self.firsts = {}
+        # Firsts  
         self.init_first()
         self.terminals_first()
+        self.epsilon_first()
+        self.loop_first()
         
-
 
         # Follow
 
@@ -153,13 +155,82 @@ class Grammar:
 
     def init_first(self):
         for line in self.grammar:
-            self.firsts[line[0][0]] = list()
+            self.firsts[line[0][0]] = set()
     
     def terminals_first(self):
         for line in self.grammar:
             for rule in line[1:]:
-                if self.is_t(rule[0]):
-                    self.firsts[line[0][0]].append(rule[0])
+                if self.is_t(rule[0]) and rule[0] != '""':
+                    self.firsts[line[0][0]].add(rule[0])
+
+    def epsilon_first(self):
+        n_epsilon = []
+        appended = True
+
+        for line in self.grammar:
+            for rule in line[1:]:
+                if rule == ['""']:
+                    n_epsilon.append(line[0][0])
+
+        
+        while appended:
+            appended = False
+            for line in self.grammar:
+                if line[0][0] not in n_epsilon:
+                    for rule in line[1:]:
+                        valid_rule = True
+
+                        for symbol in rule:
+                            if self.is_non_t(symbol):
+                                valid_rule = valid_rule and symbol in n_epsilon
+                            if self.is_t(symbol) and symbol != '""':
+                                valid_rule = False
+
+                        if valid_rule:
+                            n_epsilon.append(line[0][0])
+                            appended = True
+        
+        for valid_nt in n_epsilon:
+            self.firsts[valid_nt].add('""')
+                        
+
+    def loop_first(self):
+        appended = True
+
+        while appended:
+            appended = False
+            for line in self.grammar:
+                curr = line[0][0]
+                for rule in line[1:]: 
+                    for symbol in rule:      
+                        if self.is_t(symbol):
+                            if symbol != '""' and symbol not in self.firsts[curr]:
+                                self.firsts[curr].add(symbol)
+                                appended = True
+                            break
+
+                        if self.is_non_t(symbol):
+                            had_epsilon = '""' in self.firsts[curr]
+                            len_before = len(self.firsts[curr])
+                            self.firsts[curr] = self.firsts[curr].union(self.firsts[symbol])
+                            
+                            if not had_epsilon and '""' in self.firsts[curr]:
+                                self.firsts[curr].remove('""')
+
+                            len_after = len(self.firsts[curr])
+                            
+                            if len_before != len_after:
+                                appended = True
+                            
+                            if '""' not in self.firsts[symbol]:
+                                break
+
+
+
+                                    
+
+                        
+
 
 
 
