@@ -3,6 +3,7 @@ import re
 
 class Grammar:
     def __init__(self, grammar):
+        # Reduce grammar
         self.grammar = grammar
         self.grammar, self.start_non_terminal = self.parse_grammar()
 
@@ -12,7 +13,17 @@ class Grammar:
         self.vd = self.fill_vd()
         self.grammar = self.remove_non_vd_from_grammar()
 
-        # self.save_grammar()
+        # First
+        self.firsts = {}
+        self.init_first()
+        self.terminals_first()
+        
+
+
+        # Follow
+
+        # Placeholder
+        print("GG")
 
     def parse_grammar(self):
         temp_grammar = []
@@ -134,34 +145,28 @@ class Grammar:
 
         return new_grammar                  
 
-    def save_grammar(self):
-        if self.grammar == []:
-            with open(sys.argv[2], "w") as f:
-                f.write("PRAZDNY JAZYK")
-            return
-        
-        with open(sys.argv[2], "w") as f:
-            for i in range(len(self.grammar)):
-                for j in range(len(self.grammar[i])):
-                    rule = ''.join(self.grammar[i][j])
-                    if j == 0:
-                        f.write(f"{rule} ::= ")
-                    elif j == len(self.grammar[i]) - 1:
-                        f.write(f"{rule}\n")
-                    else:
-                        f.write(f"{rule} | ")
-
     def is_t(self, symbol):
         return '"' in symbol
     
     def is_non_t(self, symbol):
         return '>' in symbol
-        
+
+    def init_first(self):
+        for line in self.grammar:
+            self.firsts[line[0][0]] = list()
+    
+    def terminals_first(self):
+        for line in self.grammar:
+            for rule in line[1:]:
+                if self.is_t(rule[0]):
+                    self.firsts[line[0][0]].append(rule[0])
+
+
 
 def main():
-    grammar_input = open(sys.argv[1], "r")
+    grammar_input = open("debug.txt", "r")
     grammar_input = [line for line in grammar_input.readlines()]
-    reduced_grammar = Grammar(grammar_input)
+    grammar = Grammar(grammar_input)
 
 if __name__ == "__main__":
     main()
