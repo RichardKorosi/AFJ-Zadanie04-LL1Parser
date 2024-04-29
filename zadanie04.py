@@ -5,6 +5,7 @@ class Grammar:
     def __init__(self, grammar):
         self.grammar = grammar
         self.firsts = {}
+        self.follows = {}
 
         # Reduce grammar
         self.grammar, self.start_non_terminal = self.parse_grammar()
@@ -23,6 +24,8 @@ class Grammar:
         
 
         # Follow
+        self.init_follow()
+        self.loop_follow()
 
         # Placeholder
         print("GG")
@@ -223,10 +226,45 @@ class Grammar:
                             
                             if '""' not in self.firsts[symbol]:
                                 break
+    
+    def init_follow(self):
+        start = True
+        for line in self.grammar:
+            self.follows[line[0][0]] = set()
+            if start:
+                self.follows[line[0][0]].add('""')
+                start = False
 
+    def loop_follow(self):
+        appended = True
 
+        while appended:
+            appended = False
+            for line in self.grammar:
+                for rule in line[1:]:
+                    for i in range(len(rule)):
+                        symbol = rule[i]
+                        if self.is_non_t(symbol):
+                            next_symbol = rule[i+1] if i+1 < len(rule) else None
+                            len_before = len(self.follows[symbol])
 
-                                    
+                            if next_symbol == None or next_symbol == '""':
+                                self.follows[symbol] = self.follows[symbol].union(self.follows[line[0][0]])
+
+                            elif self.is_t(next_symbol) and next_symbol != '""':
+                                self.follows[symbol].add(next_symbol)
+
+                            elif self.is_non_t(next_symbol):
+                                had_epsilon = '""' in self.follows[symbol]
+                                self.follows[symbol] = self.follows[symbol].union(self.firsts[next_symbol])
+                                if not had_epsilon and '""' in self.follows[symbol]:
+                                    self.follows[symbol].remove('""')
+
+                                if '""' in self.firsts[next_symbol]:
+                                    self.follows[symbol] = self.follows[symbol].union(self.follows[line[0][0]])
+                            
+                            len_after = len(self.follows[symbol])
+                            appended = appended or len_before != len_after
 
                         
 
