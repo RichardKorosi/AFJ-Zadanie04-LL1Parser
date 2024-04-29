@@ -193,7 +193,6 @@ class Grammar:
         for valid_nt in n_epsilon:
             self.firsts[valid_nt].add('""')
                         
-
     def loop_first(self):
         appended = True
 
