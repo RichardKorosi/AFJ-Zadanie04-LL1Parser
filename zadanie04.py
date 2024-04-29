@@ -157,6 +157,11 @@ class Grammar:
     def is_non_t(self, symbol):
         return '>' in symbol
         
-text_input = open(sys.argv[1], "r")
-text_input = [line for line in text_input.readlines()]
-grammar = Grammar(text_input)
+
+def main():
+    grammar_input = open(sys.argv[1], "r")
+    grammar_input = [line for line in grammar_input.readlines()]
+    reduced_grammar = Grammar(grammar_input)
+
+if __name__ == "__main__":
+    main()
