@@ -23,7 +23,6 @@ class Grammar:
         self.epsilon_first()
         self.loop_first()
         
-
         # Follow
         self.init_follow()
         self.loop_follow()
@@ -31,6 +30,8 @@ class Grammar:
         # Predict
         self.init_predict()
         self.loop_predict()
+
+        # Reduce table
 
 
         print("GG")
@@ -250,31 +251,36 @@ class Grammar:
                     for i in range(len(rule)):
                         symbol = rule[i]
                         if self.is_non_t(symbol):
-                            next_symbol = rule[i+1] if i+1 < len(rule) else None
-                            len_before = len(self.follows[symbol])
+                            iSmb = 1
+                            while True:
+                                next_symbol = rule[i+iSmb] if i+iSmb < len(rule) else None
+                                len_before = len(self.follows[symbol])
 
-                            if next_symbol == None or next_symbol == '""':
-                                self.follows[symbol] = self.follows[symbol].union(self.follows[line[0][0]])
-
-                            elif self.is_t(next_symbol) and next_symbol != '""':
-                                self.follows[symbol].add(next_symbol)
-
-                            elif self.is_non_t(next_symbol):
-                                had_epsilon = '""' in self.follows[symbol]
-                                self.follows[symbol] = self.follows[symbol].union(self.firsts[next_symbol])
-                                if not had_epsilon and '""' in self.follows[symbol]:
-                                    self.follows[symbol].remove('""')
-
-                                if '""' in self.firsts[next_symbol]:
+                                if next_symbol == None or next_symbol == '""':
                                     self.follows[symbol] = self.follows[symbol].union(self.follows[line[0][0]])
-                            
+                                    break
+
+                                elif self.is_t(next_symbol) and next_symbol != '""':
+                                    self.follows[symbol].add(next_symbol)
+                                    break
+
+                                elif self.is_non_t(next_symbol):
+                                    had_epsilon = '""' in self.follows[symbol]
+                                    self.follows[symbol] = self.follows[symbol].union(self.firsts[next_symbol])
+                                    if not had_epsilon and '""' in self.follows[symbol]:
+                                        self.follows[symbol].remove('""')
+                                    if '""' not in self.firsts[next_symbol]:
+                                        break
+                                    else:
+                                        iSmb += 1
+
                             len_after = len(self.follows[symbol])
                             appended = appended or len_before != len_after                        
 
     def init_predict(self):
         for line in self.grammar:
             for rule in line[1:]:
-                self.predict["".join(rule)] = set()
+                self.predict["".join(line[0][0])+"::="+"".join(rule)] = set()
 
     def loop_predict(self):
         for line in self.grammar:
@@ -282,25 +288,24 @@ class Grammar:
                 for symbol in rule:
 
                     if self.is_t(symbol) and symbol != '""':
-                        self.predict["".join(rule)].add(symbol)
+                        self.predict["".join(line[0][0])+"::="+"".join(rule)].add(symbol)
                         break
 
                     elif symbol == '""':
-                        self.predict["".join(rule)] = self.predict["".join(rule)].union(self.follows[line[0][0]])
-                        if '""' in self.predict["".join(rule)]:
-                            self.predict["".join(rule)].remove('""')
+                        self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.follows[line[0][0]])
+                        # if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
+                        #     self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
                         break
 
                     elif self.is_non_t(symbol):
                         if '""' in self.firsts[symbol]:
-                            self.predict["".join(rule)] = self.predict["".join(rule)].union(self.firsts[symbol])
-                            # self.predict["".join(rule)] = self.predict["".join(rule)].union(self.follows[line[0][0]])
-                            if '""' in self.predict["".join(rule)]:
-                                self.predict["".join(rule)].remove('""')
+                            self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])
+                            if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
+                                self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
                         else:
-                            self.predict["".join(rule)] = self.predict["".join(rule)].union(self.firsts[symbol])
-                            if '""' in self.predict["".join(rule)]:
-                                self.predict["".join(rule)].remove('""')
+                            self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])
+                            # if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
+                            #     self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
                             break
 
 
