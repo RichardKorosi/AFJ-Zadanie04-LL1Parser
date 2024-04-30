@@ -1,4 +1,4 @@
-<S> ::= <C> "e"
-<A> ::= "b" | ""
-<B> ::= "f" <S> | ""
-<C> ::= <A> "c" <C> "d" | "a" <B>
+<program> ::= "begin"<prikazy>"end"
+<prikazy> ::= <prikaz> ";" <prikazy>
+<prikazy> ::= ""
+<prikaz> ::= "p"

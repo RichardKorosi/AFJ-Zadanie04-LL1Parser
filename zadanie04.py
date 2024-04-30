@@ -6,6 +6,7 @@ class Grammar:
         self.grammar = grammar
         self.firsts = {}
         self.follows = {}
+        self.predict = {}
 
         # Reduce grammar
         self.grammar, self.start_non_terminal = self.parse_grammar()
@@ -27,7 +28,11 @@ class Grammar:
         self.init_follow()
         self.loop_follow()
 
-        # Placeholder
+        # Predict
+        self.init_predict()
+        self.loop_predict()
+
+
         print("GG")
 
     def parse_grammar(self):
@@ -264,9 +269,39 @@ class Grammar:
                                     self.follows[symbol] = self.follows[symbol].union(self.follows[line[0][0]])
                             
                             len_after = len(self.follows[symbol])
-                            appended = appended or len_before != len_after
+                            appended = appended or len_before != len_after                        
 
-                        
+    def init_predict(self):
+        for line in self.grammar:
+            for rule in line[1:]:
+                self.predict["".join(rule)] = set()
+
+    def loop_predict(self):
+        for line in self.grammar:
+            for rule in line[1:]:
+                for symbol in rule:
+
+                    if self.is_t(symbol) and symbol != '""':
+                        self.predict["".join(rule)].add(symbol)
+                        break
+
+                    elif symbol == '""':
+                        self.predict["".join(rule)] = self.predict["".join(rule)].union(self.follows[line[0][0]])
+                        if '""' in self.predict["".join(rule)]:
+                            self.predict["".join(rule)].remove('""')
+                        break
+
+                    elif self.is_non_t(symbol):
+                        if '""' in self.firsts[symbol]:
+                            self.predict["".join(rule)] = self.predict["".join(rule)].union(self.firsts[symbol])
+                            # self.predict["".join(rule)] = self.predict["".join(rule)].union(self.follows[line[0][0]])
+                            if '""' in self.predict["".join(rule)]:
+                                self.predict["".join(rule)].remove('""')
+                        else:
+                            self.predict["".join(rule)] = self.predict["".join(rule)].union(self.firsts[symbol])
+                            if '""' in self.predict["".join(rule)]:
+                                self.predict["".join(rule)].remove('""')
+                            break
 
 
 
