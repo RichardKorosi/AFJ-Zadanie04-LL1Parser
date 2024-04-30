@@ -299,8 +299,9 @@ class Grammar:
 
                     elif self.is_non_t(symbol):
                         if '""' in self.firsts[symbol]:
+                            had_epsilon = '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]
                             self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])
-                            if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
+                            if not had_epsilon and '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
                                 self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
                         else:
                             self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])

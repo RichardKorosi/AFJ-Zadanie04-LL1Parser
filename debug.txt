@@ -1,4 +1,8 @@
-<S> ::= <C> "e"
-<A> ::= "b" | ""
-<B> ::= "f" <S> | ""
-<C> ::= <A> "c" <C> "d" | "a" <B>
+ <prikazy> ::= <prikaz> <prikazy>
+ <prikazy> ::= ""
+ <prikaz> ::= "if" <podmienka> "then" <prikazy> <elseCast>  "fi"
+ <prikaz> ::= "p1"
+ <prikaz> ::= "p2"
+ <elseCast>  ::= "else" <prikazy>
+ <elseCast>  ::= ""
+ <podmienka> ::= "podmienka"
