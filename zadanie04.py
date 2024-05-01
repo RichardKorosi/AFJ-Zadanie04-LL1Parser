@@ -7,6 +7,7 @@ class Grammar:
         self.firsts = {}
         self.follows = {}
         self.predict = {}
+        self.reduce_table = {}
 
         # Reduce grammar
         self.grammar, self.start_non_terminal = self.parse_grammar()
@@ -32,7 +33,13 @@ class Grammar:
         self.loop_predict()
 
         # Reduce table
-
+        self.terminals = set()
+        self.non_terminals = set()
+        self.init_reduce_table()
+        self.loop_reduce_table()
+        if self.check_if_ll1():
+            pass
+        
 
         print("GG")
 
@@ -280,7 +287,7 @@ class Grammar:
     def init_predict(self):
         for line in self.grammar:
             for rule in line[1:]:
-                self.predict["".join(line[0][0])+"::="+"".join(rule)] = set()
+                self.predict[(line[0][0], "".join(rule))] = set()
 
     def loop_predict(self):
         for line in self.grammar:
@@ -288,29 +295,58 @@ class Grammar:
                 for symbol in rule:
 
                     if self.is_t(symbol) and symbol != '""':
-                        self.predict["".join(line[0][0])+"::="+"".join(rule)].add(symbol)
+                        self.predict[(line[0][0], "".join(rule))].add(symbol)
                         break
 
                     elif symbol == '""':
-                        self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.follows[line[0][0]])
-                        # if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
-                        #     self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
+                        self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.follows[line[0][0]])
+                        # if '""' in self.predict[(line[0][0], "".join(rule))]:
+                        #     self.predict[(line[0][0], "".join(rule))].remove('""')
                         break
 
                     elif self.is_non_t(symbol):
                         if '""' in self.firsts[symbol]:
-                            had_epsilon = '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]
-                            self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])
-                            if not had_epsilon and '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
-                                self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
+                            had_epsilon = '""' in self.predict[(line[0][0], "".join(rule))]
+                            self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.firsts[symbol])
+                            if not had_epsilon and '""' in self.predict[(line[0][0], "".join(rule))]:
+                                self.predict[(line[0][0], "".join(rule))].remove('""')
                         else:
-                            self.predict["".join(line[0][0])+"::="+"".join(rule)] = self.predict["".join(line[0][0])+"::="+"".join(rule)].union(self.firsts[symbol])
-                            # if '""' in self.predict["".join(line[0][0])+"::="+"".join(rule)]:
-                            #     self.predict["".join(line[0][0])+"::="+"".join(rule)].remove('""')
+                            self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.firsts[symbol])
+                            # if '""' in self.predict[(line[0][0], "".join(rule))]:
+                            #     self.predict[(line[0][0], "".join(rule))].remove('""')
                             break
 
+    def init_reduce_table(self):
+        for line in self.grammar:
+            for rule in line[1:]:
+                for symbol in rule:
+                    if self.is_t(symbol):
+                        self.terminals.add(symbol)
 
+        for line in self.grammar:
+            self.non_terminals.add(line[0][0])
 
+        for non_terminal in self.non_terminals:
+            for terminal in self.terminals:
+                self.reduce_table[(non_terminal, terminal)] = list()
+
+    def loop_reduce_table(self):
+        for row in self.reduce_table:
+            non_t = row[0]
+            t = row[1]
+            for row2 in self.predict:
+                if row2[0] == non_t and t in self.predict[row2]:
+                    self.reduce_table[row].append(row2)
+                    break
+
+    def check_if_ll1(self):
+        for row in self.reduce_table:
+            if len(self.reduce_table[row]) > 1:
+                print("Gramatika NIE je LL(1)-gramatikou.")
+                return False
+        print("Gramatika je LL(1)-gramatikou.")
+        return True
+    
 
 def main():
     grammar_input = open("debug.txt", "r")
