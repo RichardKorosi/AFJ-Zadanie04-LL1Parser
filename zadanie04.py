@@ -43,7 +43,7 @@ class Grammar:
         if self.check_if_ll1():
             self.parse_texts()
             self.find_derivations()
-            
+
     def parse_grammar(self):
         temp_grammar = []
         parsed_grammar = []
@@ -410,14 +410,9 @@ class Grammar:
                 print("Retazec nema derivaciu.")
             
 
-
-
-
-
-
 def main():
-    grammar_input = open("debug.txt", "r")
-    texts_input = open("debug2.txt", "r")
+    grammar_input = open(sys.argv[1], "r")
+    texts_input = open(sys.argv[2], "r")
     grammar_input = [line for line in grammar_input.readlines()]
     texts_input = [line for line in texts_input.readlines()]
     grammar = Grammar(grammar_input, texts_input)
