@@ -301,8 +301,6 @@ class Grammar:
 
                     elif symbol == '""':
                         self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.follows[line[0][0]])
-                        # if '""' in self.predict[(line[0][0], "".join(rule))]:
-                        #     self.predict[(line[0][0], "".join(rule))].remove('""')
                         break
 
                     elif self.is_non_t(symbol):
@@ -311,10 +309,12 @@ class Grammar:
                             self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.firsts[symbol])
                             if not had_epsilon and '""' in self.predict[(line[0][0], "".join(rule))]:
                                 self.predict[(line[0][0], "".join(rule))].remove('""')
+
+                            if rule.index(symbol) == len(rule) - 1:
+                                self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.follows[line[0][0]])
+
                         else:
                             self.predict[(line[0][0], "".join(rule))] = self.predict[(line[0][0], "".join(rule))].union(self.firsts[symbol])
-                            # if '""' in self.predict[(line[0][0], "".join(rule))]:
-                            #     self.predict[(line[0][0], "".join(rule))].remove('""')
                             break
 
     def init_reduce_table(self):
@@ -375,27 +375,36 @@ class Grammar:
                     is_correct = False
                     break
 
-                if len(stack) != 0 and len(text) == 0:
-                    is_correct = False
-                    break
-
                 if self.is_non_t(stack[0]):
                     try:
+                        placeholder = False
+                        if len(text) == 0:
+                            placeholder = True
+                            text.append('""')
                         new = self.reduce_table[(stack[0], text[0])][0][1]
                         result.append(self.reduce_table[(stack[0], text[0])][0])
                         stack = self.parse_rule(new) + stack[1:]
 
                         if stack[0] == '""':
                             stack = stack[1:]
+
+                        if placeholder:
+                            text = text[:-1]
     
                     except:
                         is_correct = False
                         break
                 
                 elif self.is_t(stack[0]):
+                    placeholder = False
+                    if len(text) == 0:
+                        placeholder = True
+                        text.append('""')                
                     if stack[0] == text[0]:
                         stack = stack[1:]
                         text = text[1:]
+                        if placeholder:
+                            text = text[:-1]
                     else:
                         is_correct = False
                         break
