@@ -43,6 +43,7 @@ class Grammar:
         if self.check_if_ll1():
             self.parse_texts()
             self.find_derivations()
+            
     def parse_grammar(self):
         temp_grammar = []
         parsed_grammar = []
