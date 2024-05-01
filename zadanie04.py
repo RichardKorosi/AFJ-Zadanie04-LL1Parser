@@ -2,8 +2,9 @@ import sys
 import re
 
 class Grammar:
-    def __init__(self, grammar):
+    def __init__(self, grammar, texts):
         self.grammar = grammar
+        self.texts = texts
         self.firsts = {}
         self.follows = {}
         self.predict = {}
@@ -37,12 +38,11 @@ class Grammar:
         self.non_terminals = set()
         self.init_reduce_table()
         self.loop_reduce_table()
+
+        # Check if LL(1) and find derivations
         if self.check_if_ll1():
-            pass
-        
-
-        print("GG")
-
+            self.parse_texts()
+            self.find_derivations()
     def parse_grammar(self):
         temp_grammar = []
         parsed_grammar = []
@@ -347,11 +347,79 @@ class Grammar:
         print("Gramatika je LL(1)-gramatikou.")
         return True
     
+    def parse_texts(self):
+        new_texts = []
+        for line in self.texts[1:]:
+            new_line = []
+            line = line.replace("\n", "")
+            line = re.split(" ", line)
+            for symbol in line:
+                symbol = '"' + symbol + '"'
+                new_line.append(symbol)
+            new_texts.append(new_line)
+        self.texts = new_texts
+
+    def find_derivations(self):
+        for text in self.texts[:]:
+            print("*" * 50)
+            print("Retazec:", (" ".join(text)).replace('"', ""))
+            stack = [self.start_non_terminal]
+            result = []
+            is_correct = True
+            while True:
+                if len(stack) == 0 and len(text) == 0:
+                    is_correct = True
+                    break
+
+                if len(stack) == 0 and len(text) != 0:
+                    is_correct = False
+                    break
+
+                if len(stack) != 0 and len(text) == 0:
+                    is_correct = False
+                    break
+
+                if self.is_non_t(stack[0]):
+                    try:
+                        new = self.reduce_table[(stack[0], text[0])][0][1]
+                        result.append(self.reduce_table[(stack[0], text[0])][0])
+                        stack = self.parse_rule(new) + stack[1:]
+
+                        if stack[0] == '""':
+                            stack = stack[1:]
+    
+                    except:
+                        is_correct = False
+                        break
+                
+                elif self.is_t(stack[0]):
+                    if stack[0] == text[0]:
+                        stack = stack[1:]
+                        text = text[1:]
+                    else:
+                        is_correct = False
+                        break
+
+            if is_correct:
+                print("Retazec ma derivaciu.")
+                print("Postupnost pravidiel pre lavu derivaciu:")
+                for tupl in result:
+                    print("".join(tupl[0]), "::=", "".join(tupl[1]))
+            else:
+                print("Retazec nema derivaciu.")
+            
+
+
+
+
+
 
 def main():
     grammar_input = open("debug.txt", "r")
+    texts_input = open("debug2.txt", "r")
     grammar_input = [line for line in grammar_input.readlines()]
-    grammar = Grammar(grammar_input)
+    texts_input = [line for line in texts_input.readlines()]
+    grammar = Grammar(grammar_input, texts_input)
 
 if __name__ == "__main__":
     main()
