@@ -338,7 +338,6 @@ class Grammar:
             for row2 in self.predict:
                 if row2[0] == non_t and t in self.predict[row2]:
                     self.reduce_table[row].append(row2)
-                    break
 
     def check_if_ll1(self):
         for row in self.reduce_table:
