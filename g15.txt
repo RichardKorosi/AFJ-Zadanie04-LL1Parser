@@ -1,0 +1,8 @@
+ <prikazy> ::= <prikaz> <prikazy>
+ <prikazy> ::= ""
+ <prikaz> ::= "if" <podmienka> "then" <prikazy> <elseCast>  "fi"
+ <prikaz> ::= "p1"
+ <prikaz> ::= "p2"
+ <elseCast>  ::= "else" <prikazy>
+ <elseCast>  ::= ""
+ <podmienka> ::= "podmienka"

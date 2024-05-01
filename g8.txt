@@ -1,0 +1,10 @@
+<program> ::= "start" <prikazy> "koniec"
+<prikazy> ::= <prikaz> ";" <prikazy>
+<prikazy> ::= ""
+<prikaz> ::= <vyraz>
+<prikaz> ::= "ak" <podmienka> "potom" <prikaz>
+<prikaz> ::= "pokial" <podmienka> "rob" <prikaz>
+<vyraz> ::= "prikaz1"
+<vyraz> ::= "prikaz2"
+<podmienka> ::= "p1"
+<podmienka> ::= "p2"

@@ -1,0 +1,4 @@
+<program> ::= "begin" <PRIKAZY> "end"
+<PRIKAZY> ::= <PRIKAZ> ";" <PRIKAZY>
+<PRIKAZY> ::= ""
+<PRIKAZ> ::= "p"

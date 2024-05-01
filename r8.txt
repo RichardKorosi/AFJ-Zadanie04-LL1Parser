@@ -1,0 +1,2 @@
+1
+start pokial p2 rob prikaz1 ; prikaz2 koniec
